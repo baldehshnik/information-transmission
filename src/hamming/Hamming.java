@@ -1,5 +1,6 @@
 package hamming;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -63,7 +64,7 @@ class Hamming {
             String[] byteStrings = Integer.toBinaryString(item).split("");
 
             // Записываем биты из "byteStrings" в "bitsList", преобразовав каждый бит в тип Byte
-            for (String value : byteStrings) bitsList.add(Byte.parseByte(value));
+            for (String value : byteStrings) bitsList.add(Byte.parseByte(value, 2));
         }
 
         // Создаем пустой массив для хранения битов
@@ -149,9 +150,9 @@ class Hamming {
         System.out.print(message + ": ");
 
         // Выводим последовательность бит
-        for (byte bit : bits) {
+        for (int i = bits.length - 1; i >= 0; i--) {
             // Выводим текущий бит
-            System.out.print(bit);
+            System.out.print(bits[i]);
         }
 
         // Перевод на новую строку, т. е. следующее сообщение будет писаться на следующей строке
@@ -326,10 +327,46 @@ class Hamming {
         if (Arrays.equals(bits, defaultBitsArray)) {
             // Выводим результирующую строку
             System.out.println("Результирующая строка: \"" + line + "\"");
-        } else {
-            // Выводим сообщение об ошибке
-            System.out.println("Не удалось исправить ошибку!");
+
+            // Завершаем работу программы
+            return;
         }
+
+        // Выводим сообщение об ошибке
+        System.out.println("Не удалось исправить ошибку!");
+
+        // Создаем строку для записи бит
+        StringBuilder bitesSequence = new StringBuilder();
+
+        // Создаем последовательность бит
+        for (byte c : defaultBitsArray) {
+            // Добавляем текущий бит исходного массива в строку "bitesSequence"
+            bitesSequence.append(c);
+        }
+
+        // Разбиваем последовательность бит по 8 штук
+        String[] bitesArrayToConvertToBytes =  bitesSequence.toString().split("(?<=\\G.{8})");
+
+        // Создаем массив для записи байтов
+        byte[] bytesArray = new byte[bitesArrayToConvertToBytes.length];
+
+        // Преобразуем биты в байты и записываем в массив "bytesArray"
+        for (int i = 0; i < bitesArrayToConvertToBytes.length; i++) {
+            // Пробуем преобразовать текущую последовательность бит в байт и добавляем в массив
+            try {
+                // Преобразуем последовательность бит в байт
+                bytesArray[i] = Byte.parseByte(bitesArrayToConvertToBytes[i], 2);
+            } catch (NumberFormatException exception) {
+                // Преобразуем последовательность бит в целое число типа "int" и приводим его к типу "byte"
+                bytesArray[i] = (byte) Integer.parseInt(bitesArrayToConvertToBytes[i], 2);
+            }
+        }
+
+        // Конвертируем последовательность байт в строку
+        String resultString = new String(bytesArray, StandardCharsets.UTF_8);
+
+        // Выводим результирующую строку с учетом ошибки
+        System.out.println("Результирующая строка с учетом ошибки: " + resultString);
     }
 
     /**
